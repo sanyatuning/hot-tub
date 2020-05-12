@@ -1,0 +1,48 @@
+substitutions:
+  name: Hot tub
+  hostname: hot_tub
+
+api:
+
+ota:
+
+logger:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+esphome:
+  name: $hostname
+  platform: ESP8266
+  board: d1_mini
+  includes:
+    - HotTub.h
+
+custom_component:
+  lambda: |-
+    auto hotTub = new HotTub();
+    return {hotTub};
+  components:
+    id: comp
+
+sensor:
+  - platform: custom
+    lambda: |-
+      auto hotTub = (HotTub*)comp;
+      return {hotTub->temperature};
+    sensors:
+      name: "$name water temperature"
+      unit_of_measurement: °C
+
+binary_sensor:
+  - platform: custom
+    lambda: |-
+      auto hotTub = (HotTub*)comp;
+      return {hotTub->bubbles, hotTub->pumping, hotTub->heating, hotTub->locked, hotTub->on};
+    binary_sensors:
+    - name: "$name bubbles"
+    - name: "$name pumping"
+    - name: "$name heating"
+    - name: "$name locked"
+    - name: "$name ON"
